@@ -7,14 +7,20 @@ import android.provider.Settings
 import android.util.Log
 import android.service.notification.StatusBarNotification
 import android.support.v4.app.FragmentActivity
-import testapp.android.gradle.inutilfutil.com.myapplication.MyNotificationService
+import com.btg.notificationzero.MyNotificationService
 import java.util.concurrent.Semaphore
+import android.provider.Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS
+import android.content.Intent
+
+
 
 
 class MainActivity : AppCompatActivity() {
 
     companion object {
-        private val TAG = "NotificationZero"
+        private const val TAG = "NotificationZero"
+        private const val ACTION_NOTIFICATION_LISTENER_SETTINGS = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,25 +31,31 @@ class MainActivity : AppCompatActivity() {
 
         println("notificationzero started")
         Log.i("NZ", "started")
-
-        isNotificationServiceEnabled()
     }
 
     override fun onStart() {
-        isNotificationServiceEnabled()
-
         //TODO move to onclick?
-        getNotifications()
+        showNotifications()
 
         super.onStart()
     }
 
-    override fun onStop() {
-        super.onStop()
+    public override fun onResume() {
+        showNotifications()
+        super.onResume()
     }
 
+    private fun showNotifications() {
+        if (isNotificationServiceEnabled()) {
+            Log.i(TAG, "Notification enabled -- trying to fetch it")
+            getNotifications()
+        } else {
+            Log.i(TAG, "Notification disabled -- Opening settings")
+            startActivity(Intent(ACTION_NOTIFICATION_LISTENER_SETTINGS))
+        }
+    }
 
-    fun getNotifications() {
+    private fun getNotifications() {
         Log.i(TAG, "Waiting for MyNotificationService")
         val myNotificationService = MyNotificationService.get()
         Log.i(TAG, "Active Notifications: [")
@@ -63,14 +75,12 @@ class MainActivity : AppCompatActivity() {
         if(allNames != null && !allNames.isEmpty()) {
             for (n in allNames.split(":")) {
                 println("Service [$n]")
-                if(packageName.equals(ComponentName.unflattenFromString(n).packageName)) {
+                if (packageName.equals(ComponentName.unflattenFromString(n).packageName)) {
                     println("Package matched, our notification service is running")
                     return true
                 }
             }
         }
-
-
-        return false;
+        return false
     }
 }
