@@ -11,16 +11,13 @@ import com.btg.notificationzero.MyNotificationService
 import java.util.concurrent.Semaphore
 import android.provider.Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS
 import android.content.Intent
-
-
+import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity : AppCompatActivity() {
-
     companion object {
         private const val TAG = "NotificationZero"
         private const val ACTION_NOTIFICATION_LISTENER_SETTINGS = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"
-
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,6 +28,11 @@ class MainActivity : AppCompatActivity() {
 
         println("notificationzero started")
         Log.i("NZ", "started")
+
+        //FIXME mv?
+        button.setOnClickListener {
+            showNotifications()
+        }
     }
 
     override fun onStart() {
@@ -43,6 +45,10 @@ class MainActivity : AppCompatActivity() {
     public override fun onResume() {
         showNotifications()
         super.onResume()
+    }
+
+    private fun doclick() {
+        Log.i(TAG, "clicked")
     }
 
     private fun showNotifications() {
