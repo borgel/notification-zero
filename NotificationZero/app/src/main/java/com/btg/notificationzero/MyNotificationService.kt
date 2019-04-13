@@ -13,9 +13,7 @@ class MyNotificationService : NotificationListenerService() {
         internal var sem = Semaphore(0)
 
         fun get(): MyNotificationService? {
-            sem.acquireUninterruptibly()
             val ret = _this
-            sem.release()
             return ret
         }
     }
@@ -24,12 +22,10 @@ class MyNotificationService : NotificationListenerService() {
     override fun onListenerConnected() {
         Log.i(TAG, "Connected")
         _this = this
-        sem.release()
     }
 
     override fun onListenerDisconnected() {
         Log.i(TAG, "Disconnected")
-        sem.acquireUninterruptibly()
         _this = null
     }
 
