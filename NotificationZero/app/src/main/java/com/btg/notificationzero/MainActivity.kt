@@ -11,10 +11,17 @@ import com.btg.notificationzero.MyNotificationService
 import java.util.concurrent.Semaphore
 import android.provider.Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS
 import android.content.Intent
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
+import android.widget.RadioButton
 import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var layoutManager: RecyclerView.LayoutManager
+    private lateinit var dataset: Array<String>
+
     companion object {
         private const val TAG = "NotificationZero"
         private const val ACTION_NOTIFICATION_LISTENER_SETTINGS = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"
@@ -24,15 +31,41 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        //TODO disable action bar
+        Log.i(TAG, "Started")
 
-        println("notificationzero started")
-        Log.i("NZ", "started")
+        //TODO disable action bar
 
         //FIXME mv?
         button.setOnClickListener {
             showNotifications()
         }
+
+        //FIXME rm
+        initDataset()
+
+        //TODO view init?
+        recyclerView = main_recycler
+
+        // LinearLayoutManager is used here, this will layout the elements in a similar fashion
+        // to the way ListView would layout elements. The RecyclerView.LayoutManager defines how
+        // elements are laid out.
+        //applicationContext ?
+        layoutManager = LinearLayoutManager(this)
+
+        //setRecyclerViewLayoutManager(layoutManager)
+
+        // Set CustomAdapter as the adapter for RecyclerView.
+        recyclerView.layoutManager = layoutManager
+        recyclerView.adapter = MyNotificationService.NotificationListAdapter(dataset)
+    }
+
+    //FIXME rm
+    /**
+     * Generates Strings for RecyclerView's adapter. This data would usually come
+     * from a local content provider or remote server.
+     */
+    private fun initDataset() {
+        dataset = Array(50, {i -> "This is element # $i"})
     }
 
     override fun onStart() {
