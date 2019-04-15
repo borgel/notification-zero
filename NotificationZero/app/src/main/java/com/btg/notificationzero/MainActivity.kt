@@ -20,11 +20,11 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var layoutManager: RecyclerView.LayoutManager
-    private lateinit var dataset: Array<String>
 
     companion object {
         private const val TAG = "NotificationZero"
         private const val ACTION_NOTIFICATION_LISTENER_SETTINGS = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"
+        private val notificationListAdapter = MyNotificationService.NotificationListAdapter()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,9 +40,6 @@ class MainActivity : AppCompatActivity() {
             showNotifications()
         }
 
-        //FIXME rm
-        initDataset()
-
         //TODO view init?
         recyclerView = main_recycler
 
@@ -52,20 +49,15 @@ class MainActivity : AppCompatActivity() {
         //applicationContext ?
         layoutManager = LinearLayoutManager(this)
 
-        //setRecyclerViewLayoutManager(layoutManager)
-
         // Set CustomAdapter as the adapter for RecyclerView.
         recyclerView.layoutManager = layoutManager
-        recyclerView.adapter = MyNotificationService.NotificationListAdapter(dataset)
-    }
+        //recyclerView.adapter = MyNotificationService.NotificationListAdapter(dataset)
+        // FIXME better null protection
+        //recyclerView.adapter = MyNotificationService.get()?.getListAdapter()
+        recyclerView.adapter = notificationListAdapter
 
-    //FIXME rm
-    /**
-     * Generates Strings for RecyclerView's adapter. This data would usually come
-     * from a local content provider or remote server.
-     */
-    private fun initDataset() {
-        dataset = Array(50, {i -> "This is element # $i"})
+        //FIXME move? trigger how?
+        notificationListAdapter.setNotificationService(MyNotificationService.get())
     }
 
     override fun onStart() {
@@ -80,10 +72,6 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
     }
 
-    private fun doclick() {
-        Log.i(TAG, "clicked")
-    }
-
     private fun showNotifications() {
         if (isNotificationServiceEnabled()) {
             Log.i(TAG, "Notification enabled -- trying to fetch it")
@@ -94,6 +82,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    //TODO rework
     private fun getNotifications() {
         Log.i(TAG, "Waiting for MyNotificationService")
         val myNotificationService = MyNotificationService.get()

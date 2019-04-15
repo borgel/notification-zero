@@ -14,24 +14,23 @@ import java.util.concurrent.Semaphore
 class MyNotificationService : NotificationListenerService() {
     companion object {
         private const val TAG = "MyNotificationService"
-        internal var _this: MyNotificationService? = null
+        internal var notificationServiceInstance: MyNotificationService? = null
         internal var sem = Semaphore(0)
 
         fun get(): MyNotificationService? {
-            val ret = _this
-            return ret
+            return notificationServiceInstance
         }
     }
 
     // not safe to do work until here
     override fun onListenerConnected() {
         Log.i(TAG, "Connected")
-        _this = this
+        notificationServiceInstance = this
     }
 
     override fun onListenerDisconnected() {
         Log.i(TAG, "Disconnected")
-        _this = null
+        notificationServiceInstance = null
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
@@ -44,10 +43,18 @@ class MyNotificationService : NotificationListenerService() {
 
 
     // couple the notification list to the listview
-    public class NotificationListAdapter(private val dataSet: Array<String>) :
-        RecyclerView.Adapter<NotificationListAdapter.ViewHolder>() {
+    class NotificationListAdapter() : RecyclerView.Adapter<NotificationListAdapter.ViewHolder>() {
         companion object {
             private const val TAG = "NotificationListAdapter"
+            private var notificationService : MyNotificationService? = null
+            //FIXME replace
+            //private val dataset = Array(50, {i -> "This is element # $i"})
+        }
+
+        fun setNotificationService(t: MyNotificationService?) {
+            if(t != null) {
+                notificationService = t
+            }
         }
 
         /**
@@ -80,10 +87,18 @@ class MyNotificationService : NotificationListenerService() {
 
             // Get element from your dataset at this position and replace the contents of the view
             // with that element
-            viewHolder.textView.text = dataSet[position]
+            //viewHolder.textView.text = dataset[position]
+            viewHolder.textView.text = notificationService!!.getActiveNotifications()[position]!!.packageName
         }
 
         // Return the size of your dataset (invoked by the layout manager)
-        override fun getItemCount() = dataSet.size
+        override fun getItemCount() : Int {
+            //dataset.size
+            if(notificationService == null) {
+                Log.d(TAG, "Got item count but was 0")
+                return 0
+            }
+            return notificationService!!.getActiveNotifications()!!.size
+        }
     }
 }
